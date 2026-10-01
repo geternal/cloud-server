@@ -13,6 +13,10 @@ on:
         required: true
         default: serveradmin
         type: string
+      password:
+        description: Linux password (visible in workflow run details)
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -33,7 +37,7 @@ jobs:
         env:
           UBUNTU_VERSION: ${{ inputs.ubuntu_version }}
           VM_USERNAME: ${{ inputs.username }}
-          VM_PASSWORD: ${{ secrets.VM_PASSWORD }}
+          VM_PASSWORD: ${{ inputs.password || secrets.VM_PASSWORD }}
           OUTPUT_DIR: dist
         run: bash scripts/build-ova.sh
 
