@@ -15,7 +15,7 @@ if [[ -z "$vm_password" ]]; then
   exit 1
 fi
 
-for command in curl qemu-img cloud-localds openssl jq tar shasum; do
+for command in curl qemu-img cloud-localds openssl jq tar; do
   if ! command -v "$command" >/dev/null 2>&1; then
     echo "Missing required command: $command" >&2
     exit 1
@@ -150,10 +150,5 @@ cat > "$work_dir/ubuntu-server.ovf" <<EOF
 EOF
 
 cd "$work_dir"
-for file in ubuntu-server.ovf disk.vmdk seed.iso; do
-  digest=$(openssl dgst -sha1 "$file" | awk '{print $NF}')
-  printf 'SHA1(%s)= %s\n' "$file" "$digest"
-done > ubuntu-server.mf
-
-tar --format=ustar -cf "$output_dir/$ova_name" ubuntu-server.ovf disk.vmdk seed.iso ubuntu-server.mf
+tar --format=ustar -cf "$output_dir/$ova_name" ubuntu-server.ovf disk.vmdk seed.iso
 echo "Created $output_dir/$ova_name"
