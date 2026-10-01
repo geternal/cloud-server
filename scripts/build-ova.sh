@@ -92,6 +92,7 @@ mkdir -p "$output_dir"
 output_dir=$(cd "$output_dir" && pwd)
 ova_name="ubuntu-${ubuntu_version}-vmware-amd64.ova"
 
+qemu-img resize -f qcow2 "$work_dir/source.img" 10G
 qemu-img convert -p -f qcow2 -O vmdk -o subformat=streamOptimized \
   "$work_dir/source.img" "$work_dir/disk.vmdk"
 cloud-localds "$work_dir/seed.iso" "$work_dir/user-data" "$work_dir/meta-data"
@@ -139,7 +140,10 @@ cat > "$work_dir/ubuntu-server.ovf" <<EOF
         <rasd:AddressOnParent>0</rasd:AddressOnParent><rasd:ElementName>Hard disk 1</rasd:ElementName><rasd:HostResource>ovf:/disk/systemDisk</rasd:HostResource><rasd:InstanceID>4</rasd:InstanceID><rasd:Parent>3</rasd:Parent><rasd:ResourceType>17</rasd:ResourceType>
       </ovf:Item>
       <ovf:Item>
-        <rasd:AddressOnParent>1</rasd:AddressOnParent><rasd:AutomaticAllocation>true</rasd:AutomaticAllocation><rasd:ElementName>Cloud-init seed</rasd:ElementName><rasd:HostResource>ovf:/file/seedFile</rasd:HostResource><rasd:InstanceID>5</rasd:InstanceID><rasd:Parent>3</rasd:Parent><rasd:ResourceSubType>vmware.cdrom.iso</rasd:ResourceSubType><rasd:ResourceType>15</rasd:ResourceType>
+        <rasd:Address>0</rasd:Address><rasd:ElementName>IDE controller 0</rasd:ElementName><rasd:InstanceID>7</rasd:InstanceID><rasd:ResourceSubType>ide</rasd:ResourceSubType><rasd:ResourceType>5</rasd:ResourceType>
+      </ovf:Item>
+      <ovf:Item>
+        <rasd:AddressOnParent>0</rasd:AddressOnParent><rasd:AutomaticAllocation>true</rasd:AutomaticAllocation><rasd:ElementName>Cloud-init seed</rasd:ElementName><rasd:HostResource>ovf:/file/seedFile</rasd:HostResource><rasd:InstanceID>5</rasd:InstanceID><rasd:Parent>7</rasd:Parent><rasd:ResourceSubType>vmware.cdrom.iso</rasd:ResourceSubType><rasd:ResourceType>15</rasd:ResourceType>
       </ovf:Item>
       <ovf:Item>
         <rasd:AddressOnParent>7</rasd:AddressOnParent><rasd:Connection>nat</rasd:Connection><rasd:ElementName>Network adapter 1</rasd:ElementName><rasd:InstanceID>6</rasd:InstanceID><rasd:ResourceSubType>e1000e</rasd:ResourceSubType><rasd:ResourceType>10</rasd:ResourceType>
