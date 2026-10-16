@@ -8,6 +8,11 @@ on:
         required: true
         default: latest
         type: string
+      disk_size_gib:
+        description: Virtual disk capacity in GiB (thin-provisioned)
+        required: true
+        default: '10'
+        type: string
       username:
         description: Linux username to create on first boot
         required: true
@@ -36,6 +41,7 @@ jobs:
       - name: Build OVA
         env:
           UBUNTU_VERSION: ${{ inputs.ubuntu_version }}
+          DISK_SIZE_GIB: ${{ inputs.disk_size_gib }}
           VM_USERNAME: ${{ inputs.username }}
           VM_PASSWORD: ${{ inputs.password || secrets.VM_PASSWORD }}
           OUTPUT_DIR: dist

@@ -4,6 +4,7 @@ set -euo pipefail
 ubuntu_version=${UBUNTU_VERSION:-latest}
 vm_username=${VM_USERNAME:-serveradmin}
 vm_password=${VM_PASSWORD:-}
+disk_size_gib=${DISK_SIZE_GIB:-10}
 output_dir=${OUTPUT_DIR:-dist}
 
 if [[ ! "$vm_username" =~ ^[a-z_][a-z0-9_-]{0,31}$ ]]; then
@@ -12,6 +13,10 @@ if [[ ! "$vm_username" =~ ^[a-z_][a-z0-9_-]{0,31}$ ]]; then
 fi
 if [[ -z "$vm_password" ]]; then
   echo "VM_PASSWORD must be set." >&2
+  exit 1
+fi
+if [[ ! "$disk_size_gib" =~ ^[1-9][0-9]*$ ]]; then
+  echo "DISK_SIZE_GIB must be a positive whole number." >&2
   exit 1
 fi
 
@@ -81,6 +86,10 @@ ssh_pwauth: true
 chpasswd:
   expire: false
 disable_root: true
+growpart:
+  mode: auto
+  devices: ['/']
+resize_rootfs: true
 EOF
 
 cat > "$work_dir/meta-data" <<EOF
@@ -92,7 +101,7 @@ mkdir -p "$output_dir"
 output_dir=$(cd "$output_dir" && pwd)
 ova_name="ubuntu-${ubuntu_version}-vmware-amd64.ova"
 
-qemu-img resize -f qcow2 "$work_dir/source.img" 10G
+qemu-img resize -f qcow2 "$work_dir/source.img" "${disk_size_gib}G"
 qemu-img convert -p -f qcow2 -O vmdk -o subformat=streamOptimized \
   "$work_dir/source.img" "$work_dir/disk.vmdk"
 cloud-localds "$work_dir/seed.iso" "$work_dir/user-data" "$work_dir/meta-data"
@@ -155,4 +164,4 @@ EOF
 
 cd "$work_dir"
 tar --format=ustar -cf "$output_dir/$ova_name" ubuntu-server.ovf disk.vmdk seed.iso
-echo "Created $output_dir/$ova_name"
+echo "Created $output_dir/$ova_name with a dynamically allocated ${disk_size_gib} GiB virtual disk"
